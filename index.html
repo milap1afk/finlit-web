@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FinLit — see your money grow</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <style>
+    :root { --bg:#f6f7f9; --card:#fff; --ink:#1a1a1a; --muted:#6b7280;
+            --green:#12a150; --green-soft:#e8f6ee; --blue:#1f6feb; --line:#e5e7eb; }
+    * { box-sizing: border-box; }
+    body { margin:0; background:var(--bg); color:var(--ink);
+           font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+    .wrap { max-width:640px; margin:0 auto; padding:28px 18px 60px; }
+    h1 { font-size:34px; margin:0 0 2px; letter-spacing:-0.5px; }
+    .sub { color:var(--muted); margin:0 0 22px; }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:16px;
+            padding:18px 18px; margin-bottom:16px; }
+    .result { background:var(--green-soft); border:none; }
+    .result .label { color:var(--muted); font-size:14px; }
+    .result .big { font-size:40px; font-weight:800; color:var(--green); line-height:1.1; margin-top:2px; }
+    .facts { display:flex; gap:26px; margin-top:10px; }
+    .facts .k { color:var(--muted); font-size:13px; }
+    .facts .v { font-size:19px; font-weight:700; }
+    .insight { background:#eef4ff; border:none; color:#1e293b; font-size:15px; line-height:1.45; }
+    .rowlabel { display:flex; justify-content:space-between; font-size:14px; margin-bottom:6px; }
+    .rowlabel b { color:var(--blue); }
+    input[type=range]{ width:100%; accent-color:var(--blue); }
+    .field { margin:14px 0; }
+    canvas { margin-top:6px; }
+    footer { color:var(--muted); font-size:13px; text-align:center; margin-top:22px; }
+    a { color:var(--blue); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>FinLit</h1>
+    <p class="sub">See how small monthly savings grow over time.</p>
+
+    <div class="card result">
+      <div class="label" id="headline">In 10 years you'd have</div>
+      <div class="big" id="finalValue">₹0</div>
+      <div class="facts">
+        <div><div class="k">You put in</div><div class="v" id="deposited">₹0</div></div>
+        <div><div class="k">Growth</div><div class="v" id="growth">₹0</div></div>
+      </div>
+    </div>
+
+    <div class="card insight" id="insight"></div>
+
+    <div class="card">
+      <canvas id="chart" height="230"></canvas>
+    </div>
+
+    <div class="card">
+      <div class="field">
+        <div class="rowlabel"><span>Monthly saving</span><b id="mLabel">₹5,000</b></div>
+        <input type="range" id="monthly" min="500" max="50000" step="500" value="5000" />
+      </div>
+      <div class="field">
+        <div class="rowlabel"><span>Expected return</span><b id="rLabel">12.0% / year</b></div>
+        <input type="range" id="rate" min="1" max="20" step="0.5" value="12" />
+      </div>
+      <div class="field">
+        <div class="rowlabel"><span>Years invested</span><b id="yLabel">10 yrs</b></div>
+        <input type="range" id="years" min="1" max="40" step="1" value="10" />
+      </div>
+    </div>
+
+    <footer>
+      Built by Milap Kothari · the calculation engine behind
+      <a href="https://github.com/milap1afk/FinLit">FinLit (iOS)</a>
+    </footer>
+  </div>
+
+  <script>
+    // ---- The same compound-growth engine as the iOS app ----
+    // Each month: add the deposit, then grow the whole balance a little.
+    function project(monthly, ratePct, years) {
+      const r = ratePct / 100 / 12;
+      let balance = 0;
+      const yearly = [];
+      for (let m = 1; m <= years * 12; m++) {
+        balance += monthly;
+        balance += balance * r;
+        if (m % 12 === 0) yearly.push(Math.round(balance));
+      }
+      return { final: balance, yearly };
+    }
+
+    const inr = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 });
+    const rupees = (n) => "₹" + inr.format(Math.round(n));
+
+    const els = {
+      monthly: document.getElementById("monthly"),
+      rate: document.getElementById("rate"),
+      years: document.getElementById("years"),
+      mLabel: document.getElementById("mLabel"),
+      rLabel: document.getElementById("rLabel"),
+      yLabel: document.getElementById("yLabel"),
+      headline: document.getElementById("headline"),
+      finalValue: document.getElementById("finalValue"),
+      deposited: document.getElementById("deposited"),
+      growth: document.getElementById("growth"),
+      insight: document.getElementById("insight"),
+    };
+
+    let chart;
+    function render() {
+      const monthly = +els.monthly.value;
+      const ratePct = +els.rate.value;
+      const years = +els.years.value;
+
+      const { final, yearly } = project(monthly, ratePct, years);
+      const deposited = monthly * years * 12;
+      const growth = final - deposited;
+      const multiple = deposited ? (final / deposited).toFixed(1) : 0;
+
+      els.mLabel.textContent = rupees(monthly);
+      els.rLabel.textContent = ratePct.toFixed(1) + "% / year";
+      els.yLabel.textContent = years + " yrs";
+      els.headline.textContent = "In " + years + " years you'd have";
+      els.finalValue.textContent = rupees(final);
+      els.deposited.textContent = rupees(deposited);
+      els.growth.textContent = rupees(growth);
+      els.insight.textContent =
+        "Every ₹1 you invest grows to about ₹" + multiple +
+        ". Of your final total, " + rupees(growth) +
+        " is pure growth — money you never had to deposit.";
+
+      const labels = yearly.map((_, i) => i + 1);
+      if (!chart) {
+        chart = new Chart(document.getElementById("chart"), {
+          type: "line",
+          data: { labels, datasets: [{
+            data: yearly, label: "Balance",
+            borderColor: "#1f6feb", backgroundColor: "rgba(31,111,235,0.10)",
+            fill: true, tension: 0.25, pointRadius: 3, borderWidth: 2,
+          }]},
+          options: {
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { title: { display: true, text: "Year" }, grid: { display: false } },
+              y: { ticks: { callback: (v) => "₹" + inr.format(v) } },
+            },
+          },
+        });
+      } else {
+        chart.data.labels = labels;
+        chart.data.datasets[0].data = yearly;
+        chart.update();
+      }
+    }
+
+    [els.monthly, els.rate, els.years].forEach((el) => el.addEventListener("input", render));
+    render();
+  </script>
+</body>
+</html>
