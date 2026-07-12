@@ -3,157 +3,230 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>FinLit — see your money grow</title>
+  <title>FinLit — understand your money</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
   <style>
-    :root { --bg:#f6f7f9; --card:#fff; --ink:#1a1a1a; --muted:#6b7280;
-            --green:#12a150; --green-soft:#e8f6ee; --blue:#1f6feb; --line:#e5e7eb; }
-    * { box-sizing: border-box; }
-    body { margin:0; background:var(--bg); color:var(--ink);
-           font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
-    .wrap { max-width:640px; margin:0 auto; padding:28px 18px 60px; }
-    h1 { font-size:34px; margin:0 0 2px; letter-spacing:-0.5px; }
-    .sub { color:var(--muted); margin:0 0 22px; }
-    .card { background:var(--card); border:1px solid var(--line); border-radius:16px;
-            padding:18px 18px; margin-bottom:16px; }
-    .result { background:var(--green-soft); border:none; }
-    .result .label { color:var(--muted); font-size:14px; }
-    .result .big { font-size:40px; font-weight:800; color:var(--green); line-height:1.1; margin-top:2px; }
-    .facts { display:flex; gap:26px; margin-top:10px; }
-    .facts .k { color:var(--muted); font-size:13px; }
-    .facts .v { font-size:19px; font-weight:700; }
-    .insight { background:#eef4ff; border:none; color:#1e293b; font-size:15px; line-height:1.45; }
-    .rowlabel { display:flex; justify-content:space-between; font-size:14px; margin-bottom:6px; }
-    .rowlabel b { color:var(--blue); }
+    :root{
+      --bg:#f4f6fb; --card:#ffffff; --ink:#0f172a; --muted:#64748b; --line:#e6e9f0;
+      --blue:#2563eb; --blue-soft:#eaf1ff; --green:#16a34a; --green-soft:#e9f7ee; --amber:#b45309;
+    }
+    *{ box-sizing:border-box; }
+    body{ margin:0; background:var(--bg); color:var(--ink);
+          font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,sans-serif; }
+    .hero{ background:linear-gradient(135deg,#1e3a8a,#2563eb); color:#fff; padding:26px 20px 22px; }
+    .hero .in{ max-width:760px; margin:0 auto; }
+    .hero h1{ margin:0; font-size:30px; letter-spacing:-0.5px; }
+    .hero p{ margin:6px 0 0; color:#cdddff; font-size:15px; }
+    .wrap{ max-width:760px; margin:0 auto; padding:18px 16px 60px; }
+    .tabs{ display:flex; gap:6px; background:#fff; border:1px solid var(--line); border-radius:12px;
+           padding:5px; margin:-40px auto 18px; position:relative; max-width:420px; box-shadow:0 6px 20px rgba(2,20,60,.08); }
+    .tab{ flex:1; text-align:center; padding:9px 8px; border-radius:9px; cursor:pointer; font-size:14px;
+          color:var(--muted); font-weight:600; }
+    .tab.active{ background:var(--blue); color:#fff; }
+    .card{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:18px; margin-bottom:16px;
+           box-shadow:0 1px 2px rgba(2,20,60,.04); }
+    .result{ background:var(--green-soft); border:none; }
+    .result .lbl{ color:var(--muted); font-size:14px; }
+    .result .big{ font-size:38px; font-weight:800; color:var(--green); line-height:1.1; margin-top:2px; }
+    .sub{ color:var(--muted); font-size:13px; margin-top:6px; }
+    .facts{ display:flex; gap:26px; margin-top:12px; flex-wrap:wrap; }
+    .facts .k{ color:var(--muted); font-size:12px; } .facts .v{ font-size:18px; font-weight:700; }
+    .insight{ background:var(--blue-soft); color:#1e293b; font-size:14px; line-height:1.5; }
+    .field{ margin:14px 0; }
+    .rowlabel{ display:flex; justify-content:space-between; font-size:14px; margin-bottom:6px; }
+    .rowlabel b{ color:var(--blue); }
     input[type=range]{ width:100%; accent-color:var(--blue); }
-    .field { margin:14px 0; }
-    canvas { margin-top:6px; }
-    footer { color:var(--muted); font-size:13px; text-align:center; margin-top:22px; }
-    a { color:var(--blue); }
+    input[type=number]{ font:inherit; padding:9px; border:1px solid var(--line); border-radius:9px; width:100%; }
+    .hide{ display:none; }
+    h3{ margin:2px 0 4px; font-size:16px; }
+    canvas{ margin-top:8px; }
+    footer{ text-align:center; color:var(--muted); font-size:13px; }
+    footer a{ color:var(--blue); }
+    .legend{ display:flex; gap:16px; font-size:12px; color:var(--muted); margin:4px 0 2px; }
+    .sw{ display:inline-block; width:12px; height:3px; border-radius:2px; margin-right:5px; vertical-align:middle; }
   </style>
 </head>
 <body>
-  <div class="wrap">
+  <div class="hero"><div class="in">
     <h1>FinLit</h1>
-    <p class="sub">See how small monthly savings grow over time.</p>
+    <p>Three simple tools to actually understand your money.</p>
+  </div></div>
 
-    <div class="card result">
-      <div class="label" id="headline">In 10 years you'd have</div>
-      <div class="big" id="finalValue">₹0</div>
-      <div class="facts">
-        <div><div class="k">You put in</div><div class="v" id="deposited">₹0</div></div>
-        <div><div class="k">Growth</div><div class="v" id="growth">₹0</div></div>
-      </div>
+  <div class="wrap">
+    <div class="tabs">
+      <div class="tab active" data-tab="grow">Grow</div>
+      <div class="tab" data-tab="compare">Start early</div>
+      <div class="tab" data-tab="goal">Reach a goal</div>
     </div>
 
-    <div class="card insight" id="insight"></div>
-
-    <div class="card">
-      <canvas id="chart" height="230"></canvas>
-    </div>
-
-    <div class="card">
-      <div class="field">
-        <div class="rowlabel"><span>Monthly saving</span><b id="mLabel">₹5,000</b></div>
-        <input type="range" id="monthly" min="500" max="50000" step="500" value="5000" />
+    <!-- GROW -->
+    <section id="grow">
+      <div class="card result">
+        <div class="lbl" id="g-headline">In 10 years you'd have</div>
+        <div class="big" id="g-final">₹0</div>
+        <div class="sub" id="g-real"></div>
+        <div class="facts">
+          <div><div class="k">You put in</div><div class="v" id="g-dep">₹0</div></div>
+          <div><div class="k">Growth</div><div class="v" id="g-growth">₹0</div></div>
+        </div>
       </div>
-      <div class="field">
-        <div class="rowlabel"><span>Expected return</span><b id="rLabel">12.0% / year</b></div>
-        <input type="range" id="rate" min="1" max="20" step="0.5" value="12" />
+      <div class="card insight" id="g-insight"></div>
+      <div class="card"><canvas id="g-chart" height="220"></canvas></div>
+      <div class="card">
+        <div class="field"><div class="rowlabel"><span>Monthly saving</span><b id="g-mL">₹5,000</b></div>
+          <input type="range" id="g-monthly" min="500" max="100000" step="500" value="5000"></div>
+        <div class="field"><div class="rowlabel"><span>Expected return</span><b id="g-rL">12.0%/yr</b></div>
+          <input type="range" id="g-rate" min="1" max="20" step="0.5" value="12"></div>
+        <div class="field"><div class="rowlabel"><span>Years</span><b id="g-yL">10 yrs</b></div>
+          <input type="range" id="g-years" min="1" max="40" step="1" value="10"></div>
+        <div class="field"><div class="rowlabel"><span>Inflation (to show real value)</span><b id="g-iL">6.0%/yr</b></div>
+          <input type="range" id="g-infl" min="0" max="12" step="0.5" value="6"></div>
       </div>
-      <div class="field">
-        <div class="rowlabel"><span>Years invested</span><b id="yLabel">10 yrs</b></div>
-        <input type="range" id="years" min="1" max="40" step="1" value="10" />
-      </div>
-    </div>
+    </section>
 
-    <footer>
-      Built by Milap Kothari · the calculation engine behind
-      <a href="https://github.com/milap1afk/FinLit">FinLit (iOS)</a>
-    </footer>
+    <!-- COMPARE -->
+    <section id="compare" class="hide">
+      <div class="card result">
+        <div class="lbl">Starting 10 years earlier is worth</div>
+        <div class="big" id="c-gap">₹0</div>
+        <div class="sub">more by age 60 — for the exact same monthly saving.</div>
+      </div>
+      <div class="card">
+        <div class="legend">
+          <span><span class="sw" style="background:#2563eb"></span><span id="c-earlyLbl">Starts at 25</span></span>
+          <span><span class="sw" style="background:#94a3b8"></span><span id="c-lateLbl">Starts at 35</span></span>
+        </div>
+        <canvas id="c-chart" height="220"></canvas>
+      </div>
+      <div class="card insight" id="c-insight"></div>
+      <div class="card">
+        <div class="field"><div class="rowlabel"><span>Monthly saving</span><b id="c-mL">₹5,000</b></div>
+          <input type="range" id="c-monthly" min="500" max="100000" step="500" value="5000"></div>
+        <div class="field"><div class="rowlabel"><span>Expected return</span><b id="c-rL">12.0%/yr</b></div>
+          <input type="range" id="c-rate" min="1" max="20" step="0.5" value="12"></div>
+        <div class="field"><div class="rowlabel"><span>Early bird starts at age</span><b id="c-aL">25</b></div>
+          <input type="range" id="c-age" min="18" max="45" step="1" value="25"></div>
+      </div>
+    </section>
+
+    <!-- GOAL -->
+    <section id="goal" class="hide">
+      <div class="card result">
+        <div class="lbl">To reach your goal, save about</div>
+        <div class="big" id="goal-monthly">₹0</div>
+        <div class="sub">per month</div>
+      </div>
+      <div class="card insight" id="goal-insight"></div>
+      <div class="card"><canvas id="goal-chart" height="220"></canvas></div>
+      <div class="card">
+        <div class="field"><label class="rowlabel"><span>Target amount (₹)</span></label>
+          <input type="number" id="goal-target" value="5000000" min="10000" step="10000"></div>
+        <div class="field"><div class="rowlabel"><span>Years to reach it</span><b id="goal-yL">15 yrs</b></div>
+          <input type="range" id="goal-years" min="1" max="40" step="1" value="15"></div>
+        <div class="field"><div class="rowlabel"><span>Expected return</span><b id="goal-rL">12.0%/yr</b></div>
+          <input type="range" id="goal-rate" min="1" max="20" step="0.5" value="12"></div>
+      </div>
+    </section>
+
+    <footer>Built by Milap Kothari · <a href="https://github.com/milap1afk/FinLit">FinLit (iOS) source</a></footer>
   </div>
 
   <script>
-    // ---- The same compound-growth engine as the iOS app ----
-    // Each month: add the deposit, then grow the whole balance a little.
-    function project(monthly, ratePct, years) {
-      const r = ratePct / 100 / 12;
-      let balance = 0;
-      const yearly = [];
-      for (let m = 1; m <= years * 12; m++) {
-        balance += monthly;
-        balance += balance * r;
-        if (m % 12 === 0) yearly.push(Math.round(balance));
-      }
-      return { final: balance, yearly };
-    }
-
     const inr = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 });
     const rupees = (n) => "₹" + inr.format(Math.round(n));
+    const $ = (id) => document.getElementById(id);
 
-    const els = {
-      monthly: document.getElementById("monthly"),
-      rate: document.getElementById("rate"),
-      years: document.getElementById("years"),
-      mLabel: document.getElementById("mLabel"),
-      rLabel: document.getElementById("rLabel"),
-      yLabel: document.getElementById("yLabel"),
-      headline: document.getElementById("headline"),
-      finalValue: document.getElementById("finalValue"),
-      deposited: document.getElementById("deposited"),
-      growth: document.getElementById("growth"),
-      insight: document.getElementById("insight"),
-    };
-
-    let chart;
-    function render() {
-      const monthly = +els.monthly.value;
-      const ratePct = +els.rate.value;
-      const years = +els.years.value;
-
-      const { final, yearly } = project(monthly, ratePct, years);
-      const deposited = monthly * years * 12;
-      const growth = final - deposited;
-      const multiple = deposited ? (final / deposited).toFixed(1) : 0;
-
-      els.mLabel.textContent = rupees(monthly);
-      els.rLabel.textContent = ratePct.toFixed(1) + "% / year";
-      els.yLabel.textContent = years + " yrs";
-      els.headline.textContent = "In " + years + " years you'd have";
-      els.finalValue.textContent = rupees(final);
-      els.deposited.textContent = rupees(deposited);
-      els.growth.textContent = rupees(growth);
-      els.insight.textContent =
-        "Every ₹1 you invest grows to about ₹" + multiple +
-        ". Of your final total, " + rupees(growth) +
-        " is pure growth — money you never had to deposit.";
-
-      const labels = yearly.map((_, i) => i + 1);
-      if (!chart) {
-        chart = new Chart(document.getElementById("chart"), {
-          type: "line",
-          data: { labels, datasets: [{
-            data: yearly, label: "Balance",
-            borderColor: "#1f6feb", backgroundColor: "rgba(31,111,235,0.10)",
-            fill: true, tension: 0.25, pointRadius: 3, borderWidth: 2,
-          }]},
-          options: {
-            plugins: { legend: { display: false } },
-            scales: {
-              x: { title: { display: true, text: "Year" }, grid: { display: false } },
-              y: { ticks: { callback: (v) => "₹" + inr.format(v) } },
-            },
-          },
-        });
-      } else {
-        chart.data.labels = labels;
-        chart.data.datasets[0].data = yearly;
-        chart.update();
-      }
+    // Core engine (same as the iOS app): add deposit each month, then grow.
+    function project(monthly, ratePct, years) {
+      const r = ratePct / 100 / 12; let bal = 0; const yearly = [];
+      for (let m = 1; m <= years * 12; m++) { bal += monthly; bal += bal * r; if (m % 12 === 0) yearly.push(Math.round(bal)); }
+      return { final: bal, yearly };
     }
 
-    [els.monthly, els.rate, els.years].forEach((el) => el.addEventListener("input", render));
-    render();
+    const charts = {};
+    function lineChart(id, labels, datasets, xTitle) {
+      if (charts[id]) { charts[id].data.labels = labels; charts[id].data.datasets = datasets; charts[id].update(); return; }
+      charts[id] = new Chart($(id), {
+        type: "line",
+        data: { labels, datasets },
+        options: {
+          plugins: { legend: { display: false } }, interaction: { intersect: false, mode: "index" },
+          scales: {
+            x: { title: { display: !!xTitle, text: xTitle }, grid: { display: false } },
+            y: { ticks: { callback: (v) => "₹" + inr.format(v) } },
+          },
+        },
+      });
+    }
+    const ds = (data, color, fill) => ({ data, borderColor: color, backgroundColor: fill || "transparent",
+      fill: !!fill, tension: 0.25, pointRadius: 2, borderWidth: 2, spanGaps: false });
+
+    // ---------- GROW ----------
+    function renderGrow() {
+      const m = +$("g-monthly").value, rate = +$("g-rate").value, yrs = +$("g-years").value, infl = +$("g-infl").value;
+      $("g-mL").textContent = rupees(m); $("g-rL").textContent = rate.toFixed(1) + "%/yr";
+      $("g-yL").textContent = yrs + " yrs"; $("g-iL").textContent = infl.toFixed(1) + "%/yr";
+      const { final, yearly } = project(m, rate, yrs);
+      const dep = m * yrs * 12, growth = final - dep, mult = (final / dep).toFixed(1);
+      const real = final / Math.pow(1 + infl / 100, yrs);
+      $("g-headline").textContent = "In " + yrs + " years you'd have";
+      $("g-final").textContent = rupees(final);
+      $("g-real").textContent = "≈ " + rupees(real) + " in today's money (after " + infl.toFixed(1) + "% inflation)";
+      $("g-dep").textContent = rupees(dep); $("g-growth").textContent = rupees(growth);
+      $("g-insight").textContent = "Every ₹1 becomes about ₹" + mult + ". " + rupees(growth) +
+        " of your total is pure growth — money you never deposited.";
+      lineChart("g-chart", yearly.map((_, i) => i + 1), [ds(yearly, "#2563eb", "rgba(37,99,235,0.10)")], "Year");
+    }
+
+    // ---------- COMPARE ----------
+    function renderCompare() {
+      const m = +$("c-monthly").value, rate = +$("c-rate").value, age = +$("c-age").value, END = 60;
+      $("c-mL").textContent = rupees(m); $("c-rL").textContent = rate.toFixed(1) + "%/yr"; $("c-aL").textContent = age;
+      $("c-earlyLbl").textContent = "Starts at " + age; $("c-lateLbl").textContent = "Starts at " + (age + 10);
+      const earlyYrs = END - age, lateYrs = END - (age + 10);
+      const early = project(m, rate, earlyYrs).yearly, late = project(m, rate, lateYrs).yearly;
+      const gap = (early[early.length - 1] || 0) - (late[late.length - 1] || 0);
+      $("c-gap").textContent = rupees(gap);
+      const labels = []; for (let a = age + 1; a <= END; a++) labels.push(a);
+      const lateData = Array(10).fill(null).concat(late);
+      $("c-insight").textContent = "Both save " + rupees(m) + "/month at " + rate.toFixed(1) +
+        "%. The early bird just started 10 years sooner — and ends up with " + rupees(gap) + " more.";
+      lineChart("c-chart", labels, [ds(early, "#2563eb"), ds(lateData, "#94a3b8")], "Age");
+    }
+
+    // ---------- GOAL ----------
+    function requiredMonthly(target, ratePct, years) {
+      let lo = 0, hi = 10000000;
+      for (let i = 0; i < 60; i++) { const mid = (lo + hi) / 2; if (project(mid, ratePct, years).final < target) lo = mid; else hi = mid; }
+      return Math.ceil(hi / 100) * 100;
+    }
+    function renderGoal() {
+      const target = +$("goal-target").value, yrs = +$("goal-years").value, rate = +$("goal-rate").value;
+      $("goal-yL").textContent = yrs + " yrs"; $("goal-rL").textContent = rate.toFixed(1) + "%/yr";
+      const monthly = requiredMonthly(target, rate, yrs);
+      $("goal-monthly").textContent = rupees(monthly);
+      const path = project(monthly, rate, yrs).yearly;
+      const totalDep = monthly * yrs * 12;
+      $("goal-insight").textContent = "Save " + rupees(monthly) + "/month for " + yrs + " years to reach " +
+        rupees(target) + ". You'd deposit " + rupees(totalDep) + "; growth covers the rest.";
+      lineChart("goal-chart", path.map((_, i) => i + 1), [ds(path, "#16a34a", "rgba(22,163,74,0.10)")], "Year");
+    }
+
+    // ---------- tabs ----------
+    const renderers = { grow: renderGrow, compare: renderCompare, goal: renderGoal };
+    document.querySelectorAll(".tab").forEach((t) => t.onclick = () => {
+      document.querySelectorAll(".tab").forEach((x) => x.classList.remove("active"));
+      t.classList.add("active");
+      ["grow", "compare", "goal"].forEach((id) => $(id).classList.toggle("hide", id !== t.dataset.tab));
+      renderers[t.dataset.tab]();
+    });
+
+    // wire inputs
+    ["g-monthly","g-rate","g-years","g-infl"].forEach((id) => $(id).addEventListener("input", renderGrow));
+    ["c-monthly","c-rate","c-age"].forEach((id) => $(id).addEventListener("input", renderCompare));
+    ["goal-target","goal-years","goal-rate"].forEach((id) => $(id).addEventListener("input", renderGoal));
+
+    renderGrow();
   </script>
 </body>
 </html>
