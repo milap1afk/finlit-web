@@ -5,45 +5,61 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>FinLit — understand your money</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg:#f4f6fb; --card:#ffffff; --ink:#0f172a; --muted:#64748b; --line:#e6e9f0;
-      --blue:#2563eb; --blue-soft:#eaf1ff; --green:#16a34a; --green-soft:#e9f7ee; --amber:#b45309;
+      --bg:#eef1f8; --card:#ffffff; --ink:#0b1220; --muted:#6b7688; --line:#e8ecf4;
+      --brand:#4f46e5; --brand2:#2563eb; --brand-soft:#eef0ff; --green:#0a8f50;
+      --shadow:0 12px 34px rgba(18,28,60,.10);
     }
     *{ box-sizing:border-box; }
-    body{ margin:0; background:var(--bg); color:var(--ink);
-          font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,sans-serif; }
-    .hero{ background:linear-gradient(135deg,#1e3a8a,#2563eb); color:#fff; padding:26px 20px 22px; }
+    body{ margin:0; color:var(--ink);
+          background:radial-gradient(1100px 480px at 100% -8%, #e7ecff 0, rgba(231,236,255,0) 60%), var(--bg);
+          font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+          -webkit-font-smoothing:antialiased; }
+    .hero{ background:linear-gradient(135deg,#4338ca 0%,#2563eb 55%,#0ea5e9 100%); color:#fff; padding:34px 20px 48px; }
     .hero .in{ max-width:760px; margin:0 auto; }
-    .hero h1{ margin:0; font-size:30px; letter-spacing:-0.5px; }
-    .hero p{ margin:6px 0 0; color:#cdddff; font-size:15px; }
-    .wrap{ max-width:760px; margin:0 auto; padding:18px 16px 60px; }
-    .tabs{ display:flex; gap:6px; background:#fff; border:1px solid var(--line); border-radius:12px;
-           padding:5px; margin:-40px auto 18px; position:relative; max-width:420px; box-shadow:0 6px 20px rgba(2,20,60,.08); }
-    .tab{ flex:1; text-align:center; padding:9px 8px; border-radius:9px; cursor:pointer; font-size:14px;
-          color:var(--muted); font-weight:600; }
-    .tab.active{ background:var(--blue); color:#fff; }
-    .card{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:18px; margin-bottom:16px;
-           box-shadow:0 1px 2px rgba(2,20,60,.04); }
-    .result{ background:var(--green-soft); border:none; }
-    .result .lbl{ color:var(--muted); font-size:14px; }
-    .result .big{ font-size:38px; font-weight:800; color:var(--green); line-height:1.1; margin-top:2px; }
-    .sub{ color:var(--muted); font-size:13px; margin-top:6px; }
-    .facts{ display:flex; gap:26px; margin-top:12px; flex-wrap:wrap; }
-    .facts .k{ color:var(--muted); font-size:12px; } .facts .v{ font-size:18px; font-weight:700; }
-    .insight{ background:var(--blue-soft); color:#1e293b; font-size:14px; line-height:1.5; }
-    .field{ margin:14px 0; }
-    .rowlabel{ display:flex; justify-content:space-between; font-size:14px; margin-bottom:6px; }
-    .rowlabel b{ color:var(--blue); }
-    input[type=range]{ width:100%; accent-color:var(--blue); }
-    input[type=number]{ font:inherit; padding:9px; border:1px solid var(--line); border-radius:9px; width:100%; }
+    .hero h1{ margin:0; font-size:34px; font-weight:800; letter-spacing:-1px; }
+    .hero p{ margin:8px 0 0; color:#dce4ff; font-size:15.5px; }
+    .wrap{ max-width:760px; margin:0 auto; padding:0 16px 64px; }
+    .tabs{ display:flex; gap:5px; background:rgba(255,255,255,.92); backdrop-filter:blur(8px);
+           border:1px solid var(--line); border-radius:14px; padding:5px; margin:-28px auto 20px;
+           max-width:440px; box-shadow:var(--shadow); }
+    .tab{ flex:1; text-align:center; padding:10px 8px; border-radius:10px; cursor:pointer; font-size:14px;
+          color:var(--muted); font-weight:600; transition:color .18s, background .18s, box-shadow .18s; }
+    .tab:hover{ color:var(--ink); }
+    .tab.active{ background:linear-gradient(135deg,#4f46e5,#2563eb); color:#fff; box-shadow:0 6px 16px rgba(79,70,229,.35); }
+    .card{ background:var(--card); border:1px solid var(--line); border-radius:18px; padding:20px; margin-bottom:16px;
+           box-shadow:0 1px 2px rgba(18,28,60,.05); transition:box-shadow .2s, transform .2s; }
+    .card:hover{ box-shadow:var(--shadow); }
+    .result{ background:linear-gradient(160deg,#eafaf0,#f3fbf7); border:1px solid #d6efe1; }
+    .result .lbl{ color:#3c6b52; font-size:14px; font-weight:500; }
+    .result .big{ font-size:44px; font-weight:800; letter-spacing:-1.2px; color:var(--green); line-height:1.04; margin-top:4px; }
+    .sub{ color:var(--muted); font-size:13px; margin-top:8px; }
+    .facts{ display:flex; gap:30px; margin-top:16px; flex-wrap:wrap; }
+    .facts .k{ color:var(--muted); font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; }
+    .facts .v{ font-size:19px; font-weight:700; margin-top:3px; }
+    .insight{ background:var(--brand-soft); color:#282f63; font-size:14.5px; line-height:1.55; border:1px solid #e2e5ff; }
+    .field{ margin:16px 0; }
+    .rowlabel{ display:flex; justify-content:space-between; font-size:14px; margin-bottom:9px; font-weight:500; }
+    .rowlabel b{ color:var(--brand); font-weight:700; }
+    input[type=range]{ -webkit-appearance:none; appearance:none; width:100%; height:6px; border-radius:99px; background:#e4e8f3; outline:none; }
+    input[type=range]::-webkit-slider-runnable-track{ height:6px; border-radius:99px; background:#e4e8f3; }
+    input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; appearance:none; width:20px; height:20px; margin-top:-7px;
+      border-radius:50%; background:var(--brand); border:3px solid #fff; box-shadow:0 2px 8px rgba(79,70,229,.45); cursor:pointer; }
+    input[type=range]::-moz-range-track{ height:6px; border-radius:99px; background:#e4e8f3; }
+    input[type=range]::-moz-range-thumb{ width:17px; height:17px; border-radius:50%; background:var(--brand); border:3px solid #fff; cursor:pointer; }
+    input[type=number]{ font:inherit; padding:11px; border:1px solid var(--line); border-radius:11px; width:100%; background:#fbfcfe; }
+    input[type=number]:focus{ outline:none; border-color:var(--brand); box-shadow:0 0 0 3px rgba(79,70,229,.15); }
     .hide{ display:none; }
-    h3{ margin:2px 0 4px; font-size:16px; }
+    h3{ margin:2px 0 6px; font-size:16px; font-weight:700; }
     canvas{ margin-top:8px; }
-    footer{ text-align:center; color:var(--muted); font-size:13px; }
-    footer a{ color:var(--blue); }
-    .legend{ display:flex; gap:16px; font-size:12px; color:var(--muted); margin:4px 0 2px; }
-    .sw{ display:inline-block; width:12px; height:3px; border-radius:2px; margin-right:5px; vertical-align:middle; }
+    footer{ text-align:center; color:var(--muted); font-size:13px; margin-top:8px; }
+    footer a{ color:var(--brand); text-decoration:none; }
+    .legend{ display:flex; gap:18px; font-size:12.5px; color:var(--muted); margin:2px 0 6px; }
+    .sw{ display:inline-block; width:14px; height:3px; border-radius:2px; margin-right:6px; vertical-align:middle; }
   </style>
 </head>
 <body>
@@ -134,6 +150,7 @@
   <script>
     const inr = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 });
     const rupees = (n) => "₹" + inr.format(Math.round(n));
+    if (window.Chart) { Chart.defaults.font.family = "Inter, system-ui, sans-serif"; Chart.defaults.color = "#6b7688"; Chart.defaults.font.size = 12; }
     const $ = (id) => document.getElementById(id);
 
     // Core engine (same as the iOS app): add deposit each month, then grow.
